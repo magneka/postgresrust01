@@ -1,0 +1,24 @@
+version: 3.9"
+
+services:  
+  learniktib:
+
+    environment:    
+      CARGO_TARGET_DIR: "/target"
+      UCVAR: "ulriken"      
+     
+    build:
+      context: .
+      dockerfile: Dockerfile
+      
+    container_name: learnikensqlx
+
+    tty: true      
+
+    # Mount host directories to container directories
+    volumes:
+      - './source:/source'
+      - 'targetfolder:/target'
+
+volumes:
+  targetfolder:
