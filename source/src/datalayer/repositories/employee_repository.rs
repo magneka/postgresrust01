@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 use sqlx::postgres::{self, PgPoolOptions, PgRow};
-use sqlx::{query_as, Error, FromRow, Pool, Postgres, Row};
+use sqlx::{query_as, Encode, Error, FromRow, Pool, Postgres, Row};
 use sqlx::types::chrono::{DateTime, Utc};
 
 /* 
@@ -83,6 +83,14 @@ pub async fn get_all (pool: &Pool<Postgres>) -> Result<Vec<EmployeesDto>, Error>
 }
 
 
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub enum ParameterType {
+    StringType (String),
+    Integer16(i16),
+    Integer32(i32),
+}
+
 /* 
   ┌────────────────────────────────────────────────────────────────────────────┐
   │ Her modifiseres SQL statementet for å angi felt man skal selectere på      │
@@ -93,7 +101,7 @@ pub async fn get_all (pool: &Pool<Postgres>) -> Result<Vec<EmployeesDto>, Error>
   │                                                                            │
   └────────────────────────────────────────────────────────────────────────────┘
  */
- pub async fn get_by_field (pool: &Pool<Postgres>, field_name: &str, search_for: &str) -> Result<Vec<EmployeesDto>, Error> {
+pub async fn get_by_field (pool: &Pool<Postgres>, field_name: &str, search_for: ParameterType) -> Result<Vec<EmployeesDto>, Error> {
 
     let sql_string = "SELECT employee_id, last_name, first_name, title, title_of_courtesy, 
             birth_date, hire_date, address, city, region, postal_code, country, home_phone, 
@@ -104,7 +112,12 @@ pub async fn get_all (pool: &Pool<Postgres>) -> Result<Vec<EmployeesDto>, Error>
 
     let sql_string = sql_string.replace("__FIELDNAME__", field_name);
 
-    let select_query = query_as::<_, EmployeesDto>(&sql_string).bind(search_for);
+    let mut select_query = query_as::<_, EmployeesDto>(&sql_string);
+    select_query = match search_for {
+        ParameterType::StringType ( s ) => select_query.bind(s.clone()),
+        ParameterType::Integer16(s) => select_query.bind(s),
+        ParameterType::Integer32(s) => select_query.bind(s),
+    };
 
 	let result: Vec<EmployeesDto> = select_query.fetch_all(pool).await?;
 

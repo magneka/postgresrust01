@@ -5,9 +5,12 @@
  └────────────────────────────────────────────────────────────────────────────┘
 */
 #![allow(unused_imports)]
+use customer_repository::CustomerRepository;
+use employee_repository::ParameterType;
 use sqlx::postgres::{self, PgPoolOptions, PgRow};
 use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::{query_as, FromRow, Pool, Postgres, Row};
+use colored::Colorize;
 
 mod datalayer;
 use crate::datalayer::connection_pool::get_sql_connection;
@@ -48,16 +51,50 @@ use crate::datalayer::repositories::*;
 */
 #[tokio::main]
 async fn main() {
-    println!("Hello, will run queries, if dababase is online...");
+    println!("{}", "Hello, will run queries, if dababase is online...".yellow());
     let pool = match get_sql_connection().await {
         Ok(pool) => pool,
-        Err(error) => panic!("\n\nDB TILKOBLING FEILET: {}\n\n", error),
+        Err(error) => panic!("\n\nDB TILKOBLING FEILET: {}\n\n", error.to_string().red()),
     };
 
     println!("We are connected");
 
     println!("Fetching data: select all\n-------------------------");
-    let all_customers = employee_repository::get_all(&pool).await;
+    let all_employees = employee_repository::get_all(&pool).await;
+    if all_employees.is_ok() {
+        for employee in all_employees.unwrap().iter() {
+            println!("{:?}\n", employee);
+        }
+    } else {
+        println!("DB HENTING FEILET: {:?}\n\n", all_employees.err());
+    }
+
+    println!("\nSearch by id\n------------");
+    let employee_byid = employee_repository::get_by_id(&pool, 1).await;
+    if employee_byid.is_ok() {
+        for employee in employee_byid.unwrap().iter() {
+            println!("{:?}\n", employee);
+        }
+    } else {
+        println!("DB HENTING FEILET: {:?}\n\n", employee_byid.err());
+    }
+
+    println!("\nSearch by a field\n-----------------");
+    let field_name: &str = "Title";
+    //let search_for: &str = "Sales Manager";
+    let param = employee_repository::ParameterType::StringType("Sales Manager".to_string());
+    let employee_byfield = employee_repository::get_by_field(&pool, &field_name, param).await;
+    if employee_byfield.is_ok() {
+        for employee in employee_byfield.unwrap().iter() {
+            println!("{:?}\n", employee);
+        }
+    } else {
+        println!("DB HENTING FEILET: {:?}\n\n", employee_byfield.err());
+    }
+
+    let customer_repository = CustomerRepository::new(pool);
+
+    let all_customers = customer_repository.get_all().await;
     if all_customers.is_ok() {
         for customer in all_customers.unwrap().iter() {
             println!("{:?}\n", customer);
@@ -65,28 +102,6 @@ async fn main() {
     } else {
         println!("DB HENTING FEILET: {:?}\n\n", all_customers.err());
     }
-
-    println!("\nSearch by id\n------------");
-    let customer_byid = employee_repository::get_by_id(&pool, 1).await;
-    if customer_byid.is_ok() {
-        for customer in customer_byid.unwrap().iter() {
-            println!("{:?}\n", customer);
-        }
-    } else {
-        println!("DB HENTING FEILET: {:?}\n\n", customer_byid.err());
-    }
-
-    println!("\nSearch by a field\n-----------------");
-    let field_name: &str = "Title";
-    let search_for: &str = "Sales Manager";
-    let customer_byfield = employee_repository::get_by_field(&pool, &field_name, &search_for).await;
-    if customer_byfield.is_ok() {
-        for customer in customer_byfield.unwrap().iter() {
-            println!("{:?}\n", customer);
-        }
-    } else {
-        println!("DB HENTING FEILET: {:?}\n\n", customer_byfield.err());
-    }
-
+   
     println!("We are now done");
 }
