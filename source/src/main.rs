@@ -57,35 +57,35 @@ async fn main() {
     println!("We are connected");
 
     println!("Fetching data: select all\n-------------------------");
-    let all_customers = employee_repository::get_all(&pool).await;
-    if all_customers.is_ok() {
-        for customer in all_customers.unwrap().iter() {
-            println!("{:?}\n", customer);
+    let all_employees = employee_repository::get_all(&pool).await;
+    if all_employees.is_ok() {
+        for employee in all_employees.unwrap().iter() {
+            println!("{:?}\n", employee);
         }
     } else {
-        println!("DB HENTING FEILET: {:?}\n\n", all_customers.err());
+        println!("DB HENTING FEILET: {:?}\n\n", all_employees.err());
     }
 
     println!("\nSearch by id\n------------");
-    let customer_byid = employee_repository::get_by_id(&pool, 1).await;
-    if customer_byid.is_ok() {
-        for customer in customer_byid.unwrap().iter() {
-            println!("{:?}\n", customer);
+    let employee_byid = employee_repository::get_by_id(&pool, 1).await;
+    if employee_byid.is_ok() {
+        for employee in employee_byid.unwrap().iter() {
+            println!("{:?}\n", employee);
         }
     } else {
-        println!("DB HENTING FEILET: {:?}\n\n", customer_byid.err());
+        println!("DB HENTING FEILET: {:?}\n\n", employee_byid.err());
     }
 
     println!("\nSearch by a field\n-----------------");
     let field_name: &str = "Title";
     let search_for: &str = "Sales Manager";
-    let customer_byfield = employee_repository::get_by_field(&pool, &field_name, &search_for).await;
-    if customer_byfield.is_ok() {
-        for customer in customer_byfield.unwrap().iter() {
-            println!("{:?}\n", customer);
+    let employee_byfield = employee_repository::get_by_field(&pool, &field_name, &search_for).await;
+    if employee_byfield.is_ok() {
+        for employee in employee_byfield.unwrap().iter() {
+            println!("{:?}\n", employee);
         }
     } else {
-        println!("DB HENTING FEILET: {:?}\n\n", customer_byfield.err());
+        println!("DB HENTING FEILET: {:?}\n\n", employee_byfield.err());
     }
 
     println!("We are now done");
