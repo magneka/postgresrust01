@@ -14,3 +14,4 @@ pub async fn get_sql_connection () -> Result<Pool<Postgres>, Error> {
 
     Ok(pool)
 }
+

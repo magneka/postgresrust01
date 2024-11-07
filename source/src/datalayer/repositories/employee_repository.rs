@@ -57,7 +57,6 @@ pub async fn get_all (pool: &Pool<Postgres>) -> Result<Vec<EmployeesDto>, Error>
 	let result: Vec<EmployeesDto> = select_query.fetch_all(pool).await?;
 
     Ok(result)
-
 }
 
 /* 

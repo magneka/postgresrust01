@@ -93,16 +93,6 @@ async fn main() {
         println!("DB HENTING FEILET: {:?}\n\n", employee_byfield.err());
     }
 
-    let customer_repository = CustomerRepository::new(pool);
-
-    let all_customers = customer_repository.get_all().await;
-    if all_customers.is_ok() {
-        for customer in all_customers.unwrap().iter() {
-            println!("{:?}\n", customer);
-        }
-    } else {
-        println!("DB HENTING FEILET: {:?}\n\n", all_customers.err());
-    }
    
     println!("We are now done");
 }
