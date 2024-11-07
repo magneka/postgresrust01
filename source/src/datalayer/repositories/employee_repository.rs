@@ -3,7 +3,7 @@ use sqlx::postgres::{self, PgPoolOptions, PgRow};
 use sqlx::{query_as, Encode, Error, FromRow, Pool, Postgres, Row};
 use sqlx::types::chrono::{DateTime, Utc};
 
-use super::repository_tools::ParameterType;
+use super::repository_tools::{set_parameter, ParameterType};
 
 /* 
   ┌────────────────────────────────────────────────────────────────────────────┐
@@ -38,8 +38,6 @@ pub struct EmployeesDto {
     pub reports_to: Option<i16>,
     pub photo_path: Option<String>,
 }
-
-
 
 /* 
   ┌────────────────────────────────────────────────────────────────────────────┐
@@ -86,7 +84,6 @@ pub async fn get_all (pool: &Pool<Postgres>) -> Result<Vec<EmployeesDto>, Error>
     Ok(result)
 }
 
-
 /* 
   ┌────────────────────────────────────────────────────────────────────────────┐
   │ Her modifiseres SQL statementet for å angi felt man skal selectere på      │
@@ -115,7 +112,7 @@ pub async fn get_by_field (pool: &Pool<Postgres>, field_name: &str, search_for: 
 
     Ok(result)
 }
-
+/*
 pub fn set_parameter(select_query: sqlx::query::QueryAs<'_, Postgres, EmployeesDto, postgres::PgArguments>, search_for: ParameterType) -> sqlx::query::QueryAs<'_, Postgres, EmployeesDto, postgres::PgArguments> {
     let select_query: sqlx::query::QueryAs<'_, Postgres, _, postgres::PgArguments> = match search_for {
         ParameterType::StringType ( s ) => select_query.bind(s.clone()),
@@ -124,3 +121,4 @@ pub fn set_parameter(select_query: sqlx::query::QueryAs<'_, Postgres, EmployeesD
     };
     select_query
 }
+*/
