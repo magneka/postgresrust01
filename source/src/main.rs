@@ -6,7 +6,7 @@
 */
 #![allow(unused_imports)]
 use customer_repository::CustomerRepository;
-use employee_repository::ParameterType;
+use repository_tools::ParameterType;
 use sqlx::postgres::{self, PgPoolOptions, PgRow};
 use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::{query_as, FromRow, Pool, Postgres, Row};
@@ -70,7 +70,8 @@ async fn main() {
     }
 
     println!("\nSearch by id\n------------");
-    let employee_byid = employee_repository::get_by_id(&pool, 1).await;
+    let id = ParameterType::Integer16(1);
+    let employee_byid = employee_repository::get_by_id(&pool, id).await;
     if employee_byid.is_ok() {
         for employee in employee_byid.unwrap().iter() {
             println!("{:?}\n", employee);
@@ -82,7 +83,7 @@ async fn main() {
     println!("\nSearch by a field\n-----------------");
     let field_name: &str = "Title";
     //let search_for: &str = "Sales Manager";
-    let param = employee_repository::ParameterType::StringType("Sales Manager".to_string());
+    let param = ParameterType::StringType("Sales Manager".to_string());
     let employee_byfield = employee_repository::get_by_field(&pool, &field_name, param).await;
     if employee_byfield.is_ok() {
         for employee in employee_byfield.unwrap().iter() {

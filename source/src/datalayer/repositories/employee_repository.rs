@@ -3,6 +3,8 @@ use sqlx::postgres::{self, PgPoolOptions, PgRow};
 use sqlx::{query_as, Encode, Error, FromRow, Pool, Postgres, Row};
 use sqlx::types::chrono::{DateTime, Utc};
 
+use super::repository_tools::ParameterType;
+
 /* 
   ┌────────────────────────────────────────────────────────────────────────────┐
   │ Deklarasjon av data transfer object for en database tabell                 │
@@ -68,28 +70,22 @@ pub async fn get_all (pool: &Pool<Postgres>) -> Result<Vec<EmployeesDto>, Error>
   │ Det ser ikke ut som tiberius støtter navngitte parametre                   │  
   └────────────────────────────────────────────────────────────────────────────┘
  */
- pub async fn get_by_id (pool: &Pool<Postgres>, id: i16) -> Result<Vec<EmployeesDto>, Error> {
+ pub async fn get_by_id (pool: &Pool<Postgres>, id: ParameterType) -> Result<Vec<EmployeesDto>, Error> {
 
-    let select_query = query_as::<_, EmployeesDto>( 
-        "SELECT employee_id, last_name, first_name, title, title_of_courtesy, 
+    let sql_string = "SELECT employee_id, last_name, first_name, title, title_of_courtesy, 
             birth_date, hire_date, address, city, region, postal_code, country, home_phone, 
             extension, photo, notes, reports_to, photo_path
         FROM employees
-        WHERE employee_id = $1").bind(id);
+        WHERE employee_id = $1";
+
+    let mut select_query = query_as::<_, EmployeesDto>(&sql_string);
+    select_query = set_parameter(select_query, id);
 
 	let result: Vec<EmployeesDto> = select_query.fetch_all(pool).await?;
 
     Ok(result)
 }
 
-
-#[allow(dead_code)]
-#[derive(Debug, Clone)]
-pub enum ParameterType {
-    StringType (String),
-    Integer16(i16),
-    Integer32(i32),
-}
 
 /* 
   ┌────────────────────────────────────────────────────────────────────────────┐
@@ -113,13 +109,18 @@ pub async fn get_by_field (pool: &Pool<Postgres>, field_name: &str, search_for: 
     let sql_string = sql_string.replace("__FIELDNAME__", field_name);
 
     let mut select_query = query_as::<_, EmployeesDto>(&sql_string);
-    select_query = match search_for {
-        ParameterType::StringType ( s ) => select_query.bind(s.clone()),
-        ParameterType::Integer16(s) => select_query.bind(s),
-        ParameterType::Integer32(s) => select_query.bind(s),
-    };
+    select_query = set_parameter(select_query, search_for);
 
 	let result: Vec<EmployeesDto> = select_query.fetch_all(pool).await?;
 
     Ok(result)
+}
+
+pub fn set_parameter(select_query: sqlx::query::QueryAs<'_, Postgres, EmployeesDto, postgres::PgArguments>, search_for: ParameterType) -> sqlx::query::QueryAs<'_, Postgres, EmployeesDto, postgres::PgArguments> {
+    let select_query: sqlx::query::QueryAs<'_, Postgres, _, postgres::PgArguments> = match search_for {
+        ParameterType::StringType ( s ) => select_query.bind(s.clone()),
+        ParameterType::Integer16(s) => select_query.bind(s),
+        ParameterType::Integer32(s) => select_query.bind(s),
+    };
+    select_query
 }
