@@ -2,7 +2,7 @@
 mod tests {
    
     use crate::{
-        category_repository::CategoryRepository, 
+        category_repository::{CategoryDto, CategoryRepository}, 
         datalayer::connection_pool::get_sql_connection, 
         repository_tools::ParameterType
     };
@@ -85,5 +85,26 @@ mod tests {
         }   
         
         assert_eq!(record_count, 0);   
+    }
+
+    #[tokio::test]
+    async fn test_insert_category() {
+
+        let mut _insert_result = false;
+        let category_repository = get_repository().await;
+
+        let category = CategoryDto {
+            category_id:21, 
+            category_name: "Mka kat".to_string(), 
+            description: Some("Vi sjekker om insert fungerer".to_string()), 
+            picture: None
+        };
+
+        let insert_result = category_repository.insert(&category).await;
+        if insert_result.is_ok() {
+            _insert_result = true;
+        }   
+        
+        assert_eq!(_insert_result, true);   
     }
 }

@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 use sqlx::postgres::{self, PgPoolOptions, PgRow};
-use sqlx::{query_as, Encode, Error, FromRow, Pool, Postgres, Row};
+use sqlx::{query, query_as, Encode, Error, Executor, FromRow, Pool, Postgres, Row};
 use sqlx::types::chrono::{DateTime, Utc};
 
 use super::repository_tools::{set_parameter, ParameterType};
@@ -27,6 +27,7 @@ pub struct CategoryDto {
 
 static TABLENAME: &str = "categories";
 static FIELDNAMES: &str = "category_id, category_name, description, picture";
+//static FIELDNAMES: &str = "category_id, category_name, description";
 static IDFIELDNAME: &str = "category_id";
 
 
@@ -73,5 +74,22 @@ impl CategoryRepository {
     
         Ok(result)
     }
+
+    pub async fn insert (self, dto_record: &CategoryDto) -> Result<CategoryDto, Error> {
+
+
+        let sql_string = format!("INSERT INTO {} ({}) VALUES ($1, $2, $3, $4)", TABLENAME,  FIELDNAMES);            
+        
+        let _query = sqlx::query(&sql_string)
+        .bind(&dto_record.category_id)   
+        .bind(&dto_record.category_name)   
+        .bind(&dto_record.description)   
+        .bind(&dto_record.picture)        
+        .execute(&self.connpool).await?;
+
+        Ok(dto_record.clone())
+    }
+
+
 
 }

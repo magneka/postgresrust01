@@ -5,6 +5,7 @@
  └────────────────────────────────────────────────────────────────────────────┘
 */
 #![allow(unused_imports)]
+use category_repository::CategoryRepository;
 use customer_repository::CustomerRepository;
 use repository_tools::ParameterType;
 use sqlx::postgres::{self, PgPoolOptions, PgRow};
@@ -92,6 +93,17 @@ async fn main() {
     } else {
         println!("DB HENTING FEILET: {:?}\n\n", employee_byfield.err());
     }
+
+    let category_repository = CategoryRepository::new(pool);
+    let category = category_repository::CategoryDto {
+        category_id:20, 
+        category_name: "test".to_string(), 
+        description: Some("test".to_string()), 
+        picture: None
+    };
+
+    let insert_result = category_repository.insert(&category).await.unwrap();
+
 
    
     println!("We are now done");
