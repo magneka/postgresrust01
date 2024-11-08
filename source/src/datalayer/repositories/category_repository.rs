@@ -90,6 +90,33 @@ impl CategoryRepository {
         Ok(dto_record.clone())
     }
 
+    /*
+/* 
+  ┌───────────────────────────────────────────────────────────────────────────────────────┐
+  │     Merk at dette krever at du har installert dotenv crate, kjører dotenv().ok()      │
+  │     i start av main.  Du må sette opp connection strengen i en .env file som må       │
+  │     ligge i roten av prosjektet.  Lag "DATABASE_URL=...".  SQLX må includere          │
+  │     fetature "macros".                                                                │
+  │                                                                                       │
+  │     Nå vil det bli sjekket design time (dvs i vs code edit) og compile time           │
+  │     at det ikke er feil i sql statement, og at det stemmer med DTO.                   │
+  │     SQL statementet kan IKKR ligge i en variabel.                                     │
+  │      */                                                                               │
+  └───────────────────────────────────────────────────────────────────────────────────────┘
+ */
+    pub async fn select_by_id_macro(self, id: i16) -> Option<CategoryDto> {
+
+        let account = sqlx::query_as!(
+            CategoryDto,
+            "select * from categories where category_id = $1",
+            id  //1i16
+        )
+        .fetch_one(&self.connpool)
+        .await.unwrap();
+
+        Some(account)
+    }
+
 
 
 }
