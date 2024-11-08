@@ -7,5 +7,6 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.38"
 colored = "2.1.0"
-sqlx = { version = "0.8.2", features = ["postgres", "runtime-tokio-native-tls", "chrono"] }
+dotenv = "0.15.0"
+sqlx = { version = "0.8.2", features = ["postgres", "runtime-tokio-native-tls", "chrono", "macros"] }
 tokio = { version = "1", features = ["full"] }

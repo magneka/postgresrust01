@@ -15,7 +15,7 @@ pub fn set_parameter<T>(
     p_select_query: sqlx::query::QueryAs<'_, Postgres, T, postgres::PgArguments>,
     search_for: ParameterType,
 ) -> sqlx::query::QueryAs<'_, Postgres, T, postgres::PgArguments> {
-    
+
     let r_select_query: sqlx::query::QueryAs<'_, Postgres, _, postgres::PgArguments> =
         match search_for {
             ParameterType::StringType(s) => p_select_query.bind(s.clone()),

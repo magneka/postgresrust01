@@ -12,6 +12,7 @@ use sqlx::postgres::{self, PgPoolOptions, PgRow};
 use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::{query_as, FromRow, Pool, Postgres, Row};
 use colored::Colorize;
+use dotenv::dotenv;
 
 mod datalayer;
 use crate::datalayer::connection_pool::get_sql_connection;
@@ -52,6 +53,9 @@ use crate::datalayer::repositories::*;
 */
 #[tokio::main]
 async fn main() {
+
+    dotenv().ok();
+
     println!("{}", "Hello, will run queries, if dababase is online...".yellow());
     let pool = match get_sql_connection().await {
         Ok(pool) => pool,
@@ -102,9 +106,14 @@ async fn main() {
         picture: None
     };
 
-    let insert_result = category_repository.insert(&category).await.unwrap();
 
-
+    let _insert_result = category_repository.insert(&category).await;
+    match _insert_result {
+        Ok(_e) => {println!("insert ok");}
+        Err(e) => {
+            println!("**** insert feilet fordi:\n{:?}", e);
+        }
+    };
    
     println!("We are now done");
 }
