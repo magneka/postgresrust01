@@ -107,4 +107,29 @@ mod tests {
         
         assert_eq!(_insert_result, true);   
     }
+
+    #[tokio::test]
+    async fn test_insert_category_using_macro() {
+
+        let mut _insert_result = false;
+        let category_repository = get_repository().await;
+
+        let category = CategoryDto {
+            category_id:21, 
+            category_name: "Mka kat".to_string(), 
+            description: Some("Vi sjekker om insert fungerer".to_string()), 
+            picture: None
+        };
+
+
+        let category_name = "Mka kat";
+        let description = "Vi sjekker om insert fungerer";
+
+        let insert_result = category_repository.insert_by_macro(&category_name, &description).await;
+        if insert_result.is_ok() {
+            _insert_result = true;
+        }   
+        
+        assert_eq!(_insert_result, true);   
+    }
 }

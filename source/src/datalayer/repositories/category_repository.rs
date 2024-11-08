@@ -117,6 +117,22 @@ impl CategoryRepository {
         Some(account)
     }
 
+    pub async fn insert_by_macro(self, category_name: &str, description: &str) -> Result<bool, Error> {
+
+        let account = sqlx::query!(
+            "INSERT INTO categories (category_id, category_name, description)
+            VALUES((SELECT MAX( category_id ) + 1 FROM categories), $1, $2)",
+            &category_name, 
+            &description
+        )
+        .fetch_one(&self.connpool)
+        .await2?;
+
+        Ok(true)
+    }
+
+    
+
 
 
 }

@@ -100,15 +100,20 @@ async fn main() {
 
     let category_repository = CategoryRepository::new(pool);
     let category = category_repository::CategoryDto {
-        category_id:20, 
+        category_id:25, 
         category_name: "test".to_string(), 
         description: Some("test".to_string()), 
         picture: None
     };
 
 
-    let _insert_result = category_repository.insert(&category).await;
-    match _insert_result {
+    let category_name = "Mka kat";
+    let description = "Vi sjekker om insert fungerer";
+
+    let insert_result = category_repository.insert_by_macro(&category_name, &description).await;
+
+    //let _insert_result = category_repository.insert(&category).await;
+    match insert_result {
         Ok(_e) => {println!("insert ok");}
         Err(e) => {
             println!("**** insert feilet fordi:\n{:?}", e);
