@@ -5,7 +5,7 @@
  └────────────────────────────────────────────────────────────────────────────┘
 */
 #![allow(unused_imports)]
-use category_repository::CategoryRepository;
+use category_repository::{CategoryDto, CategoryRepository};
 use customer_repository::CustomerRepository;
 use repository_tools::ParameterType;
 use sqlx::postgres::{self, PgPoolOptions, PgRow};
@@ -106,19 +106,27 @@ async fn main() {
         picture: None
     };
 
-
+    
+    
     let category_name = "Mka kat";
     let description = "Vi sjekker om insert fungerer";
-
-    let insert_result = category_repository.insert_by_macro(&category_name, &description).await;
-
-    //let _insert_result = category_repository.insert(&category).await;
+    let category = CategoryDto { 
+        category_id: 0, 
+        category_name: "MKA TEST".to_string(), 
+        description: Some("Did it return id?".to_string()), 
+        picture: None,        
+    };
+    
+    //let insert_result = category_repository.insert_by_macro(&category_name, &description).await;
+    
+    let insert_result = category_repository.insert(&category).await;
     match insert_result {
-        Ok(_e) => {println!("insert ok");}
+        Ok(_e) => {println!("insert ok {:?}", _e);}
         Err(e) => {
             println!("**** insert feilet fordi:\n{:?}", e);
         }
     };
+    
    
     println!("We are now done");
 }

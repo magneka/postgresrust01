@@ -64,6 +64,7 @@ impl CategoryRepository {
         Ok(result)
     }
 
+    // Returnerer ny id.
     pub async fn get_by_field (self, field_name: &str, search_for: ParameterType) -> Result<Vec<CategoryDto>, Error> {
 
         let sql_string = format!("SELECT {} FROM {} WHERE {} = $1", FIELDNAMES, TABLENAME, &field_name);            
@@ -77,17 +78,22 @@ impl CategoryRepository {
 
     pub async fn insert (self, dto_record: &CategoryDto) -> Result<CategoryDto, Error> {
 
-
-        let sql_string = format!("INSERT INTO {} ({}) VALUES ($1, $2, $3, $4)", TABLENAME,  FIELDNAMES);            
+        let sql_string = format!("INSERT INTO {} ({}) 
+            VALUES ((SELECT MAX( category_id ) FROM categories) + 1, $2, $3, $4)
+            returning category_id
+            ", TABLENAME,  FIELDNAMES);            
         
-        let _query = sqlx::query(&sql_string)
+        let new_id: (i16,) = sqlx::query_as(&sql_string)
         .bind(&dto_record.category_id)   
         .bind(&dto_record.category_name)   
         .bind(&dto_record.description)   
         .bind(&dto_record.picture)        
-        .execute(&self.connpool).await?;
+        .fetch_one(&self.connpool).await?;
 
-        Ok(dto_record.clone())
+        let mut result = dto_record.clone();
+        result.category_id = new_id.0;
+
+        Ok(result)
     }
 
     /*
@@ -117,19 +123,22 @@ impl CategoryRepository {
         Some(account)
     }
 
+    /*
     pub async fn insert_by_macro(self, category_name: &str, description: &str) -> Result<bool, Error> {
+        
+    let row: (i16,) = sqlx::query_as!(
+        "INSERT INTO categories (category_id, category_name, description) 
+        VALUES((SELECT MAX( category_id ) FROM categories) + 1, $1, $2) 
+        returning category_id",
+        &category_name, 
+        &description,
+    )
+    .fetch_one(&self.connpool)
+    .await;
 
-        let account = sqlx::query!(
-            "INSERT INTO categories (category_id, category_name, description)
-            VALUES((SELECT MAX( category_id ) + 1 FROM categories), $1, $2)",
-            &category_name, 
-            &description
-        )
-        .fetch_one(&self.connpool)
-        .await2?;
-
-        Ok(true)
-    }
+Ok(true)
+}
+*/
 
     
 
