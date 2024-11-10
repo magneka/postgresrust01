@@ -111,27 +111,31 @@ async fn main() {
     //let description = "Vi sjekker om insert fungerer";
     //let insert_result = category_repository.insert(&category_name, &description).await;
 
-    let category = CategoryDto { 
+    let mut category = CategoryDto { 
         category_id: 0, 
         category_name: "MKA TEST".to_string(), 
         description: Some("Did it return id?".to_string()), 
         picture: None,        
     };
+    print!("Category before insert: {:?}\n", category);
     
     let insert_result = &category_repository.clone().insert(&category).await;
     match insert_result {
-        Ok(_e) => {
-            println!("insert ok, id= {:?}", _e.category_id);           
+        Ok(e) => {
+            println!("insert ok, id= {:?}", e.category_id);  
+            category = e.clone();         
         }
         Err(e) => {
             println!("**** insert feilet fordi:\n{:?}", e);
         }
     };
-    let inserted = insert_result.as_ref().unwrap();
-    print!("Inserted record: {:?}", inserted);
+    print!("Category after insert: {:?}\n", category);
+    //let category.category_id = insert_result.as_ref().unwrap().category_id;
+    //let inserted = insert_result.as_ref().unwrap();
+    //print!("Inserted record: {:?}", inserted);
     
     let category_to_update = category_repository::CategoryDto {
-        category_id: inserted.category_id, 
+        category_id: category.category_id, 
         category_name: "My Category".to_string(), 
         description: Some("Juhuu, was uptdated!!??, gone?".to_string()), 
         picture: None
@@ -141,9 +145,9 @@ async fn main() {
     let rows_affected: u64 = *update_result.as_ref().unwrap();
     println!("updated {:?} rows.", rows_affected);
 
-    let delete_result = &category_repository.clone().delete(&inserted.category_id).await;
+    let delete_result = &category_repository.clone().delete(&category.category_id).await;
     let rows_affected: u64 = *delete_result.as_ref().unwrap();
-    println!("Deleted {:?} rows.", rows_affected);
+    println!("Deleted byid: {}, {:?} rows.", &category.category_id, rows_affected);
         
     println!("We are now done");
 }
