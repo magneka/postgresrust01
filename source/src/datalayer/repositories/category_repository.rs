@@ -27,7 +27,6 @@ pub struct CategoryDto {
 
 static TABLENAME: &str = "categories";
 static FIELDNAMES: &str = "category_id, category_name, description, picture";
-//static FIELDNAMES: &str = "category_id, category_name, description";
 static IDFIELDNAME: &str = "category_id";
 
 
@@ -116,6 +115,23 @@ impl CategoryRepository {
         .bind(&dto_record.category_name)   
         .bind(&dto_record.description)   
         .bind(&dto_record.picture)        
+        .execute(&self.connpool).await?;
+
+        Ok(results.rows_affected())
+    }
+
+    pub async fn delete (self, id: &i16) -> Result<u64, Error> {
+
+        let sql_string = format!(
+            "DELETE FROM 
+                {} 
+            WHERE 
+                {} = $1;
+            ",        
+            TABLENAME,  IDFIELDNAME);            
+        
+        let results = sqlx::query(&sql_string)
+        .bind(&id)           
         .execute(&self.connpool).await?;
 
         Ok(results.rows_affected())

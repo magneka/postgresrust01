@@ -130,17 +130,20 @@ async fn main() {
     let inserted = insert_result.as_ref().unwrap();
     print!("Inserted record: {:?}", inserted);
     
-    //let new_id: &i16 = &inserted_category.category_id;
     let category_to_update = category_repository::CategoryDto {
         category_id: inserted.category_id, 
         category_name: "My Category".to_string(), 
-        description: Some("Juhuu, was uptdated!!??".to_string()), 
+        description: Some("Juhuu, was uptdated!!??, gone?".to_string()), 
         picture: None
     };
     
     let update_result = &category_repository.clone().update(&category_to_update.clone()).await;
     let rows_affected: u64 = *update_result.as_ref().unwrap();
     println!("updated {:?} rows.", rows_affected);
+
+    let delete_result = &category_repository.clone().delete(&inserted.category_id).await;
+    let rows_affected: u64 = *delete_result.as_ref().unwrap();
+    println!("Deleted {:?} rows.", rows_affected);
         
     println!("We are now done");
 }
