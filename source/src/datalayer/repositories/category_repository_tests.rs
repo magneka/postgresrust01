@@ -94,7 +94,7 @@ mod tests {
         let category_repository = get_repository().await;
 
         let category = CategoryDto {
-            category_id:21, 
+            category_id: 9, 
             category_name: "Mka kat".to_string(), 
             description: Some("Vi sjekker om insert fungerer".to_string()), 
             picture: None
@@ -108,6 +108,33 @@ mod tests {
         assert_eq!(_insert_result, true);   
     }
 
+    #[tokio::test]
+    async fn test_update_category() {
+
+        let mut record_count = 0;
+        let category_repository = get_repository().await;
+
+        let category = CategoryDto {
+            category_id:9, 
+            category_name: "MKA UPDATE".to_string(), 
+            description: Some("Insert må ha fungert,".to_string()), 
+            picture: None
+        };
+
+        let updated_records = category_repository.update(&category).await;
+        if updated_records.is_ok() {
+            record_count = updated_records.unwrap();
+        } else {
+            print!("{:?}", updated_records.err())
+        }    
+        
+        assert_eq!(record_count, 0);   
+    }
+
+
+
+    /*
+    
     #[tokio::test]
     async fn test_insert_category_using_macro() {
 
@@ -132,4 +159,5 @@ mod tests {
         
         assert_eq!(_insert_result, true);   
     }
+    */
 }

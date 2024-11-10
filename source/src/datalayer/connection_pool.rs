@@ -9,7 +9,11 @@ use std::env;
  */
 pub async fn get_sql_connection () -> Result<Pool<Postgres>, Error> {
 
-    let connection_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set.");
+    let connection_url = env::var("DATABASE_URL").unwrap_or_else(|_| {        
+        "postgres://magneka:Bunnpris2012@billigpg.postgres.database.azure.com/postgres".to_owned()
+    });
+
+    //let connection_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set.");
 
     let pool: Pool<Postgres>  = PgPoolOptions::new()
         .max_connections(5)

@@ -5,12 +5,14 @@
  └────────────────────────────────────────────────────────────────────────────┘
 */
 #![allow(unused_imports)]
+use std::borrow::Borrow;
+
 use category_repository::{CategoryDto, CategoryRepository};
 use customer_repository::CustomerRepository;
 use repository_tools::ParameterType;
 use sqlx::postgres::{self, PgPoolOptions, PgRow};
 use sqlx::types::chrono::{DateTime, Utc};
-use sqlx::{query_as, FromRow, Pool, Postgres, Row};
+use sqlx::{query_as, Either, FromRow, Pool, Postgres, Row};
 use colored::Colorize;
 use dotenv::dotenv;
 
@@ -64,6 +66,7 @@ async fn main() {
 
     println!("We are connected");
 
+    /*
     println!("Fetching data: select all\n-------------------------");
     let all_employees = employee_repository::get_all(&pool).await;
     if all_employees.is_ok() {
@@ -98,18 +101,16 @@ async fn main() {
         println!("DB HENTING FEILET: {:?}\n\n", employee_byfield.err());
     }
 
-    let category_repository = CategoryRepository::new(pool);
-    let category = category_repository::CategoryDto {
-        category_id:25, 
-        category_name: "test".to_string(), 
-        description: Some("test".to_string()), 
-        picture: None
-    };
+    let category_repository: CategoryRepository = CategoryRepository::new(pool);
 
-    
-    
-    let category_name = "Mka kat";
-    let description = "Vi sjekker om insert fungerer";
+    */
+
+    let mut category_repository =  &CategoryRepository::new(pool);
+
+    //let category_name = "Mka kat";
+    //let description = "Vi sjekker om insert fungerer";
+    //let insert_result = category_repository.insert(&category_name, &description).await;
+
     let category = CategoryDto { 
         category_id: 0, 
         category_name: "MKA TEST".to_string(), 
@@ -117,16 +118,29 @@ async fn main() {
         picture: None,        
     };
     
-    //let insert_result = category_repository.insert_by_macro(&category_name, &description).await;
-    
-    let insert_result = category_repository.insert(&category).await;
+    let insert_result = &category_repository.clone().insert(&category).await;
     match insert_result {
-        Ok(_e) => {println!("insert ok {:?}", _e);}
+        Ok(_e) => {
+            println!("insert ok, id= {:?}", _e.category_id);           
+        }
         Err(e) => {
             println!("**** insert feilet fordi:\n{:?}", e);
         }
     };
+    let inserted = insert_result.as_ref().unwrap();
+    print!("Inserted record: {:?}", inserted);
     
-   
+    //let new_id: &i16 = &inserted_category.category_id;
+    let category_to_update = category_repository::CategoryDto {
+        category_id: inserted.category_id, 
+        category_name: "My Category".to_string(), 
+        description: Some("Juhuu, was uptdated!!??".to_string()), 
+        picture: None
+    };
+    
+    let update_result = &category_repository.clone().update(&category_to_update.clone()).await;
+    let rows_affected: u64 = *update_result.as_ref().unwrap();
+    println!("updated {:?} rows.", rows_affected);
+        
     println!("We are now done");
 }
