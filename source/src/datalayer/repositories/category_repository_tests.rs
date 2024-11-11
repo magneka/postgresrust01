@@ -131,6 +131,74 @@ mod tests {
         assert_eq!(record_count, 0);   
     }
 
+    #[tokio::test]
+    async fn test_insert_update_delete() {
+
+        // Opprette repo med connection
+        let mut category_repository = get_repository().await;
+
+        // Ny categori
+        let mut category = CategoryDto { 
+            category_id: 0, 
+            category_name: "MKA TEST".to_string(), 
+            description: Some("Did it return id?".to_string()), 
+            picture: None,        
+        };
+        print!("Category before insert: {:?}\n", category);
+
+        // Insert og sjekk at vi fikk ny ID
+        let insert_result = &category_repository.clone().insert(&category).await;
+        match insert_result {
+            Ok(e) => {
+                println!("insert ok, id= {:?}", e.category_id);  
+                category = e.clone();         
+            }
+            Err(e) => {
+                println!("**** insert feilet fordi:\n{:?}", e);
+            }
+        };
+        print!("Category after insert: {:?}\n", category);
+
+        // Hent categori basert på ny ID for å se at den er der
+        let mut record_count = 0;
+        let id = ParameterType::Integer16(category.category_id);
+        let all_categorys = &category_repository.clone().get_by_id(id.to_owned()).await;
+        if all_categorys.is_ok() {
+            record_count = all_categorys.as_ref().unwrap().len();
+        } else {
+            print!("{:?}", all_categorys.as_ref().err())
+        }
+        print!("Hentet {} record by id {:?}\n", record_count, all_categorys);
+
+        // Lag en ny categori med samme id for å oppdatere db
+        let category_to_update = CategoryDto {
+            category_id: category.category_id, 
+            category_name: "My Category".to_string(), 
+            description: Some("Juhuu, was uptdated!!??, gone?".to_string()), 
+            picture: None
+        };
+
+        // Oppdtater og sjekk hvor mange rader som ble oppdatert
+        let update_result = &category_repository.clone().update(&category_to_update.clone()).await;
+        let rows_affected: u64 = *update_result.as_ref().unwrap();
+        println!("updated {:?} rows.", rows_affected);
+
+        // Hent ut by id igjen for å sjekke at den er oppdatert
+        let all_categorys = &category_repository.clone().get_by_id(id).await;
+        if all_categorys.is_ok() {
+            record_count = all_categorys.as_ref().unwrap().len();
+        } else {
+            print!("{:?}", all_categorys.as_ref().err())
+        }
+        print!("Hentet {} record by id {:?}\n", record_count, all_categorys);
+
+        // Så rydder vi til slutt med å slette posten
+        let delete_result = &category_repository.clone().delete(&category.category_id).await;
+        let rows_affected: u64 = *delete_result.as_ref().unwrap();
+        println!("Deleted byid: {}, {:?} rows.", &category.category_id, rows_affected);
+
+    }
+
 
 
     /*
