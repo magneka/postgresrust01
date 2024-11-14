@@ -128,7 +128,7 @@ mod tests {
             print!("{:?}", updated_records.err())
         }    
         
-        assert_eq!(record_count, 0);   
+        assert_eq!(record_count, 1);   
     }
 
     #[tokio::test]
