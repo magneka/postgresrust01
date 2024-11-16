@@ -73,4 +73,85 @@ impl CustomerRepository {
         Ok(result)
     }
 
+    pub async fn insert (self, dto_record: &CustomersDto) -> Result<CustomersDto, Error> {
+
+        let sql_string = format!("INSERT INTO {} ({}) 
+        VALUES $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        ", TABLENAME,  FIELDNAMES);            
+    
+        //let new_id: (i16,) = sqlx::query_as(&sql_string)
+        let _qresult = sqlx::query(&sql_string)
+        .bind(&dto_record.customer_id)   
+        .bind(&dto_record.company_name)   
+        .bind(&dto_record.contact_name)   
+        .bind(&dto_record.contact_title)   
+        .bind(&dto_record.address)               
+        .bind(&dto_record.city)        
+        .bind(&dto_record.region)        
+        .bind(&dto_record.postal_code)        
+        .bind(&dto_record.country)        
+        .bind(&dto_record.phone)        
+        .bind(&dto_record.fax)   
+        .execute(&self.connpool).await?;
+
+        let result = dto_record.clone();
+        //result.category_id = new_id.0;
+
+        Ok(result)
+    }
+
+    pub async fn update (self, dto_record: &CustomersDto) -> Result<u64, Error> {
+
+        let sql_string = format!(
+            "UPDATE 
+                {} 
+            SET 
+                company_name = $2, 
+                contact_name = $3, 
+                contact_title = $4, 
+                address = $5, 
+                city = $6, 
+                region = $7, 
+                postal_code = $8, 
+                country = $9, 
+                phone = $10, 
+                fax = $11
+            WHERE 
+                {} = $1;
+            ",        
+            TABLENAME,  IDFIELDNAME);            
+        
+        let results = sqlx::query(&sql_string)
+        .bind(&dto_record.customer_id)  
+        .bind(&dto_record.company_name)   
+        .bind(&dto_record.contact_name)   
+        .bind(&dto_record.contact_title)   
+        .bind(&dto_record.address)               
+        .bind(&dto_record.city)        
+        .bind(&dto_record.region)        
+        .bind(&dto_record.postal_code)        
+        .bind(&dto_record.country)        
+        .bind(&dto_record.phone)        
+        .bind(&dto_record.fax)        
+        .execute(&self.connpool).await?;
+
+        Ok(results.rows_affected())
+    }
+
+    pub async fn delete (self, id: &i16) -> Result<u64, Error> {
+
+        let sql_string = format!(
+            "DELETE FROM 
+                {} 
+            WHERE 
+                {} = $1;
+            ",        
+            TABLENAME,  IDFIELDNAME);            
+        
+        let results = sqlx::query(&sql_string)
+        .bind(&id)           
+        .execute(&self.connpool).await?;
+
+        Ok(results.rows_affected())
+    }
 }
